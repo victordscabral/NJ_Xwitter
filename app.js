@@ -5,6 +5,7 @@ const middleware = require('./middleware')
 const path = require('path')
 const bodyParser = require("body-parser")
 const mongoose = require("./database");
+const session = require("express-session");
 
 const server = app.listen(port, () => console.log("Servidor ouvindo na porta " + port));
 
@@ -13,6 +14,12 @@ app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(session({
+    secret: "hashSession",
+    resave: true,
+    saveUninitialized: false
+}))
 
 const loginRoute = require('./routes/loginRoutes');
 const registerRoute = require('./routes/registerRoutes');
@@ -23,7 +30,8 @@ app.use("/register", registerRoute);
 app.get("/", middleware.requireLogin, (req, res, next) => {
 
     var payload = {
-        pageTitle: "Home"
+        pageTitle: "Home",
+        userLoggedIn: req.session.user
     }
 
     res.status(200).render("home", payload);
