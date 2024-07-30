@@ -14,6 +14,7 @@ O projeto Xwitter é uma recriação simplificada da plataforma de mídia social
 - **JavaScript**: Linguagem de programação usada para a lógica do lado do cliente e do servidor.
 - **MongoDB**: Banco de dados NoSQL para armazenamento dos dados.
 - **Mongoose**: Biblioteca de modelagem de objetos MongoDB para Node.js.
+- **Pug**: Motor de template para Node.js, utilizado para gerar HTML dinamicamente.
 - **HTML**: Linguagem de marcação para estruturação do conteúdo das páginas web.
 - **CSS**: Linguagem de estilo para a formatação visual das páginas web.
 
