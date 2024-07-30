@@ -24,11 +24,6 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 - Você instalou a versão mais recente do Node.js (v22.5.1 ou superior).
 
-## Screenshots
-
-![](assets/img1.jpg)
-![](assets/img2.jpg)
-
 ## Passos para Instalação
 
 1. **Clone o repositório**
