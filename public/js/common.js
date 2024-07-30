@@ -31,30 +31,59 @@ $("#submitPostButton").click((event) => {
     })
 })
 
-function formatBrazilianDate(isoDate) {
-    const date = new Date(isoDate);
-    const options = {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        timeZone: 'America/Sao_Paulo'
-    };
-    const formatter = new Intl.DateTimeFormat('pt-BR', options);
-    return formatter.format(date);
+$(document).on("click", ".likeButton", (event) => {
+    var button = $(event.target);
+    var postId = getPostIdFromElement(button);
+    
+    if(postId === undefined) return;
+
+    $.ajax({
+        url: `/api/posts/${postId}/like`,
+        type: "PUT",
+        success: (postData) => {
+            
+            button.find("span").text(postData.likes.length || "");
+
+            if(postData.likes.includes(userLoggedIn._id)) {
+                button.addClass("active");
+            }
+            else {
+                button.removeClass("active");
+            }
+
+        }
+    })
+
+})
+
+function getPostIdFromElement(element) {
+    var isRoot = element.hasClass("post");
+    var rootElement = isRoot == true ? element : element.closest(".post");
+    var postId = rootElement.data().id;
+
+    if(postId === undefined) return alert("Id da postagem indefinido");
+
+    return postId;
 }
 
 function createPostHtml(postData) {
+    
     var postedBy = postData.postedBy;
-    var displayName = postedBy.firstName + " " + postedBy.lastName;
-    var timestamp = formatBrazilianDate(postData.createdAt);
 
-    return `<div class='post'>
+    if(postedBy._id === undefined) {
+        return console.log("User object not populated");
+    }
+
+    var displayName = postedBy.firstName + " " + postedBy.lastName;
+    var timestamp = timeDifference(new Date(), new Date(postData.createdAt));
+
+    var likeButtonActiveClass = postData.likes.includes(userLoggedIn._id) ? "active" : "";
+
+    return `<div class='post' data-id='${postData._id}'>
+
                 <div class='mainContentContainer'>
                     <div class='userImageContainer'>
-                        <img src='${postedBy.profilePic}' alt='Profile Picture'>
+                        <img src='${postedBy.profilePic}'>
                     </div>
                     <div class='postContentContainer'>
                         <div class='header'>
@@ -71,18 +100,49 @@ function createPostHtml(postData) {
                                     <i class='far fa-comment'></i>
                                 </button>
                             </div>
-                            <div class='postButtonContainer'>
-                                <button>
+                            <div class='postButtonContainer green'>
+                                <button class='retweet'>
                                     <i class='fas fa-retweet'></i>
                                 </button>
                             </div>
-                            <div class='postButtonContainer'>
-                                <button>
+                            <div class='postButtonContainer red'>
+                                <button class='likeButton ${likeButtonActiveClass}'>
                                     <i class='far fa-heart'></i>
+                                    <span>${postData.likes.length || ""}</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>`;
+}
+
+function timeDifference(current, previous) {
+    var msPerMinute = 60 * 1000;
+    var msPerHour = msPerMinute * 60;
+    var msPerDay = msPerHour * 24;
+    var msPerMonth = msPerDay * 30;
+    var msPerYear = msPerDay * 365;
+
+    var elapsed = current - previous;
+
+    if (elapsed < msPerMinute) {
+        if(elapsed / 1000 < 30) return "Agora mesmo";
+        return Math.round(elapsed / 1000) + ' segundos atrás';   
+    }
+    else if (elapsed < msPerHour) {
+        return Math.round(elapsed / msPerMinute) + ' minutos atrás';   
+    }
+    else if (elapsed < msPerDay) {
+        return Math.round(elapsed / msPerHour) + ' horas atrás';   
+    }
+    else if (elapsed < msPerMonth) {
+        return Math.round(elapsed / msPerDay) + ' dias atrás';   
+    }
+    else if (elapsed < msPerYear) {
+        return Math.round(elapsed / msPerMonth) + ' meses atrás';   
+    }
+    else {
+        return Math.round(elapsed / msPerYear) + ' anos atrás';   
+    }
 }
